@@ -14,6 +14,7 @@ variable "roles" {
     namespace      = string
     service_account = string
     policy_arns    = list(string)
+    role_path      = optional(string, "/")
   }))
   description = "IRSA roles to create."
 }

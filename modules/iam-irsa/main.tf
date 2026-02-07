@@ -28,6 +28,7 @@ resource "aws_iam_role" "this" {
   for_each = var.roles
 
   name               = each.value.role_name
+  path               = lookup(each.value, "role_path", "/")
   assume_role_policy = data.aws_iam_policy_document.assume_role[each.key].json
 }
 

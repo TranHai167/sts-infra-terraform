@@ -36,7 +36,11 @@ resource "aws_iam_role_policy_attachment" "node" {
     worker     = "arn:aws:iam::aws:policy/AmazonEKSWorkerNodePolicy"
     cni        = "arn:aws:iam::aws:policy/AmazonEKS_CNI_Policy"
     ecr        = "arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryReadOnly"
+    ecr_pull   = "arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryPullOnly"
     ssm        = "arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore"
+    ebs_csi    = "arn:aws:iam::aws:policy/AmazonEBSCSIDriverPolicy"
+    efs_csi    = "arn:aws:iam::aws:policy/AmazonEFSCIDriverPolicy"
+    secrets_rw = "arn:aws:iam::aws:policy/SecretsManagerReadWrite"
   } : {}
 
   role       = aws_iam_role.node[0].name

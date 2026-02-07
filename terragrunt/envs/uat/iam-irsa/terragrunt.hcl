@@ -28,9 +28,18 @@ locals {
         policy_arns     = [dependency.addons_iam.outputs.ebs_policy_arn]
       }
     },
+    local.env_config.enable_external_secrets ? {
+      external_secrets = {
+        role_name       = "external-secrets-role"
+        role_path       = "/eks/"
+        namespace       = "external-secrets"
+        service_account = "external-secrets"
+        policy_arns     = [dependency.addons_iam.outputs.external_secrets_policy_arn]
+      }
+    } : {},
     local.env_config.enable_karpenter ? {
       karpenter_controller = {
-        role_name       = "${local.env_config.cluster_name}-karpenter-controller"
+        role_name       = "KarpenterControllerRole-eks-sts-central"
         namespace       = "karpenter"
         service_account = "karpenter"
         policy_arns     = [dependency.addons_iam.outputs.karpenter_policy_arn]

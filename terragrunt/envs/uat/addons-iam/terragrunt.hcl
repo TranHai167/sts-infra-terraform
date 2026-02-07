@@ -18,4 +18,5 @@ inputs = {
   cluster_name            = local.env_config.cluster_name
   enable_alb_policy       = local.env_config.enable_alb
   enable_karpenter_policy = local.env_config.enable_karpenter
+  enable_external_secrets_policy = local.env_config.enable_external_secrets
 }

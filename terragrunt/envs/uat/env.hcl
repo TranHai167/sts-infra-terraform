@@ -13,7 +13,8 @@ locals {
   node_max           = 2
   max_pods_per_node  = 21
   enable_alb       = true
-  enable_karpenter = false
+  enable_karpenter = true
+  enable_external_secrets = true
 
   tags = {
     Project = "sts"

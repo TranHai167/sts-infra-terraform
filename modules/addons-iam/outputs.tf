@@ -12,3 +12,8 @@ output "ebs_policy_arn" {
   value       = var.ebs_policy_arn
   description = "EBS CSI policy ARN."
 }
+
+output "external_secrets_policy_arn" {
+  value       = try(aws_iam_policy.external_secrets[0].arn, null)
+  description = "External Secrets controller policy ARN."
+}
