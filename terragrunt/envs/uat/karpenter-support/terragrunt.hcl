@@ -26,5 +26,7 @@ inputs = {
   create_security_group  = true
   manage_kms_key         = true
   kms_key_alias          = "alias/${local.env_config.cluster_name}-karpenter-ebs"
+  enable_node_kms_policy = true
+  node_kms_key_arn        = "arn:aws:kms:ap-southeast-1:344414913751:key/c44a2a9b-97d5-485d-9811-a262e5359257"
   tags                   = local.env_config.tags
 }

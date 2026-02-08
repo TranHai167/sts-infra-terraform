@@ -11,6 +11,10 @@ locals {
   instance_profile_name = var.instance_profile_name != "" ? var.instance_profile_name : local.role_name
   security_group_name   = var.security_group_name != "" ? var.security_group_name : "karpenter-${var.cluster_name}-nodes"
   kms_alias_name        = var.kms_key_alias != "" ? var.kms_key_alias : "alias/${var.cluster_name}-karpenter-ebs"
+  node_additional_policy_arns = var.enable_node_kms_policy ? concat(
+    var.node_additional_policy_arns,
+    [aws_iam_policy.node_kms[0].arn]
+  ) : var.node_additional_policy_arns
 }
 
 resource "aws_iam_role" "node" {
@@ -42,10 +46,35 @@ resource "aws_iam_role_policy_attachment" "managed" {
 }
 
 resource "aws_iam_role_policy_attachment" "additional" {
-  for_each = var.create_role ? toset(var.node_additional_policy_arns) : []
+  for_each = var.create_role ? toset(local.node_additional_policy_arns) : []
 
   role       = aws_iam_role.node[0].name
   policy_arn = each.value
+}
+
+resource "aws_iam_policy" "node_kms" {
+  count = var.enable_node_kms_policy ? 1 : 0
+
+  name = "KarpenterNodeKms-${var.cluster_name}"
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Sid    = "AllowKMSKeyUsage"
+        Effect = "Allow"
+        Action = [
+          "kms:Encrypt",
+          "kms:Decrypt",
+          "kms:ReEncrypt*",
+          "kms:GenerateDataKey*",
+          "kms:CreateGrant",
+          "kms:DescribeKey"
+        ]
+        Resource = var.node_kms_key_arn
+      }
+    ]
+  })
 }
 
 resource "aws_iam_instance_profile" "node" {

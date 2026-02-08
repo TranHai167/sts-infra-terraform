@@ -85,6 +85,18 @@ variable "node_additional_policy_arns" {
   default     = []
 }
 
+variable "enable_node_kms_policy" {
+  type        = bool
+  description = "Whether to create and attach a KMS usage policy for Karpenter nodes."
+  default     = false
+}
+
+variable "node_kms_key_arn" {
+  type        = string
+  description = "KMS key ARN for Karpenter node usage policy."
+  default     = ""
+}
+
 variable "tags" {
   type        = map(string)
   description = "Tags to apply to created resources."

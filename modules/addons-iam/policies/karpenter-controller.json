@@ -4,6 +4,7 @@
     {
       "Effect": "Allow",
       "Action": [
+        "ec2:Describe*",
         "ec2:CreateLaunchTemplate",
         "ec2:CreateFleet",
         "ec2:RunInstances",
@@ -38,7 +39,15 @@
     {
       "Effect": "Allow",
       "Action": [
-        "iam:PassRole"
+        "iam:PassRole",
+        "iam:CreateInstanceProfile",
+        "iam:DeleteInstanceProfile",
+        "iam:TagInstanceProfile",
+        "iam:UntagInstanceProfile",
+        "iam:AddRoleToInstanceProfile",
+        "iam:RemoveRoleFromInstanceProfile",
+        "iam:GetInstanceProfile",
+        "iam:ListInstanceProfiles"
       ],
       "Resource": "*"
     },
@@ -55,6 +64,15 @@
         "ssm:GetParameter"
       ],
       "Resource": "arn:aws:ssm:*:*:parameter/aws/service/*"
+    },
+    {
+      "Effect": "Allow",
+      "Action": [
+        "kms:GenerateDataKeyWithoutPlainText",
+        "kms:CreateGrant",
+        "kms:DescribeKey"
+      ],
+      "Resource": "arn:aws:kms:ap-southeast-1:344414913751:key/c44a2a9b-97d5-485d-9811-a262e5359257"
     }
   ]
 }
