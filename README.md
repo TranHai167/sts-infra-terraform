@@ -145,6 +145,8 @@ terragrunt apply
 
 ## Kết nối kubectl tới EKS
 
+Lưu ý config aws profile trước.
+
 ```powershell
 $env:AWS_PROFILE="sts-uat"
 aws eks update-kubeconfig --region ap-southeast-1 --name non-prod-eks-sts
