@@ -1,3 +1,9 @@
+MIME-Version: 1.0
+Content-Type: multipart/mixed; boundary="==BOUNDARY=="
+
+--==BOUNDARY==
+Content-Type: text/x-shellscript; charset="us-ascii"
+
 #!/bin/bash
 set -o xtrace
 
@@ -8,3 +14,5 @@ if [ ${max_pods} -gt 0 ]; then
 fi
 
 /etc/eks/bootstrap.sh ${cluster_name} $EXTRA_ARGS
+
+--==BOUNDARY==--

@@ -4,7 +4,23 @@ include "common" {
 
 locals {
   env_config = read_terragrunt_config(find_in_parent_folders("env.hcl")).locals
+}
 
+terraform {
+  source = "../../../../modules/iam-irsa"
+}
+
+dependency "eks" {
+  config_path = "../eks"
+}
+
+dependency "addons_iam" {
+  config_path = "../addons-iam"
+}
+
+inputs = {
+  oidc_provider_arn = dependency.eks.outputs.oidc_provider_arn
+  oidc_provider_url = dependency.eks.outputs.oidc_provider_url
   roles = merge(
     local.env_config.enable_alb ? {
       alb_controller = {
@@ -39,29 +55,11 @@ locals {
     } : {},
     local.env_config.enable_karpenter ? {
       karpenter_controller = {
-        role_name       = "KarpenterControllerRole-eks-sts-central"
+        role_name       = "KarpenterControllerRole-${local.env_config.cluster_name}"
         namespace       = "karpenter"
         service_account = "karpenter"
         policy_arns     = [dependency.addons_iam.outputs.karpenter_policy_arn]
       }
     } : {}
   )
-}
-
-terraform {
-  source = "../../../../modules/iam-irsa"
-}
-
-dependency "eks" {
-  config_path = "../eks"
-}
-
-dependency "addons_iam" {
-  config_path = "../addons-iam"
-}
-
-inputs = {
-  oidc_provider_arn = dependency.eks.outputs.oidc_provider_arn
-  oidc_provider_url = dependency.eks.outputs.oidc_provider_url
-  roles             = local.roles
 }

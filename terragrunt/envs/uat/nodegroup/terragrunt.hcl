@@ -27,11 +27,11 @@ inputs = {
     max     = local.env_config.node_max
   }
   labels = {
-    "eks.amazonaws.com/nodegroup" = local.env_config.nodegroup_name
+    "sts.io/nodegroup" = local.env_config.nodegroup_name
   }
   taints = [
     {
-      key    = "eks.amazonaws.com/system"
+      key    = "sts.io/system"
       value  = "true"
       effect = "NO_SCHEDULE"
     }

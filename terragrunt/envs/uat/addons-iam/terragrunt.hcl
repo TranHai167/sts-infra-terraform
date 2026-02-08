@@ -12,6 +12,7 @@ terraform {
 
 dependency "eks" {
   config_path = "../eks"
+  skip_outputs = true
 }
 
 inputs = {

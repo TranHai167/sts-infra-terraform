@@ -12,6 +12,7 @@ terraform {
 
 dependency "vpc" {
   config_path = "../vpc"
+  skip_outputs = true
 }
 
 inputs = {

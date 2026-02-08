@@ -38,8 +38,8 @@ resource "aws_iam_role_policy_attachment" "node" {
     ecr        = "arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryReadOnly"
     ecr_pull   = "arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryPullOnly"
     ssm        = "arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore"
-    ebs_csi    = "arn:aws:iam::aws:policy/AmazonEBSCSIDriverPolicy"
-    efs_csi    = "arn:aws:iam::aws:policy/AmazonEFSCIDriverPolicy"
+    ebs_csi    = "arn:aws:iam::aws:policy/service-role/AmazonEBSCSIDriverPolicy"
+    efs_csi    = "arn:aws:iam::aws:policy/service-role/AmazonEFSCSIDriverPolicy"
     secrets_rw = "arn:aws:iam::aws:policy/SecretsManagerReadWrite"
   } : {}
 
@@ -64,6 +64,13 @@ resource "aws_launch_template" "this" {
   instance_type = var.launch_template.instance_type
 
   vpc_security_group_ids = var.launch_template.security_group_ids
+
+  tag_specifications {
+    resource_type = "instance"
+    tags = {
+      Name = "${var.cluster_name}-${var.node_group_name}-node"
+    }
+  }
 
   dynamic "block_device_mappings" {
     for_each = var.launch_template.block_device_mappings
