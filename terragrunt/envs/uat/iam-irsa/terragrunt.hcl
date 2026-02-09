@@ -56,7 +56,7 @@ inputs = {
     local.env_config.enable_karpenter ? {
       karpenter_controller = {
         role_name       = "KarpenterControllerRole-${local.env_config.cluster_name}"
-        namespace       = "karpenter"
+        namespace       = "kube-system"
         service_account = "karpenter"
         policy_arns     = [dependency.addons_iam.outputs.karpenter_policy_arn]
       }
