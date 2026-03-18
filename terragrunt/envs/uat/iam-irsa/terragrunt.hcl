@@ -21,13 +21,17 @@ dependency "addons_iam" {
 inputs = {
   oidc_provider_arn = dependency.eks.outputs.oidc_provider_arn
   oidc_provider_url = dependency.eks.outputs.oidc_provider_url
+  alb_policy_arn = dependency.addons_iam.outputs.alb_policy_arn
+  ebs_policy_arn = dependency.addons_iam.outputs.ebs_policy_arn
+  external_secrets_policy_arn = dependency.addons_iam.outputs.external_secrets_policy_arn
+  karpenter_policy_arn = dependency.addons_iam.outputs.karpenter_policy_arn
   roles = merge(
     local.env_config.enable_alb ? {
       alb_controller = {
         role_name       = "${local.env_config.cluster_name}-aws-load-balancer-controller"
         namespace       = "kube-system"
         service_account = "aws-load-balancer-controller"
-        policy_arns     = [dependency.addons_iam.outputs.alb_policy_arn]
+        policy_arns     = [inputs.alb_policy_arn]
       }
     } : {},
     {
@@ -35,13 +39,13 @@ inputs = {
         role_name       = "${local.env_config.cluster_name}-ebs-csi-controller"
         namespace       = "kube-system"
         service_account = "ebs-csi-controller-sa"
-        policy_arns     = [dependency.addons_iam.outputs.ebs_policy_arn]
+        policy_arns     = [inputs.ebs_policy_arn]
       }
       ebs_csi_node = {
         role_name       = "${local.env_config.cluster_name}-ebs-csi-node"
         namespace       = "kube-system"
         service_account = "ebs-csi-node-sa"
-        policy_arns     = [dependency.addons_iam.outputs.ebs_policy_arn]
+        policy_arns     = [inputs.ebs_policy_arn]
       }
     },
     local.env_config.enable_external_secrets ? {
@@ -50,7 +54,7 @@ inputs = {
         role_path       = "/eks/"
         namespace       = "external-secrets"
         service_account = "external-secrets"
-        policy_arns     = [dependency.addons_iam.outputs.external_secrets_policy_arn]
+        policy_arns     = [inputs.external_secrets_policy_arn]
       }
     } : {},
     local.env_config.enable_karpenter ? {
@@ -58,7 +62,7 @@ inputs = {
         role_name       = "KarpenterControllerRole-${local.env_config.cluster_name}"
         namespace       = "kube-system"
         service_account = "karpenter"
-        policy_arns     = [dependency.addons_iam.outputs.karpenter_policy_arn]
+        policy_arns     = [inputs.karpenter_policy_arn]
       }
     } : {}
   )

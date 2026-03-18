@@ -20,6 +20,10 @@ resource "aws_iam_role" "cluster" {
       }
     ]
   })
+    lifecycle {
+      prevent_destroy = true
+      ignore_changes = [name]
+    }
 }
 
 resource "aws_iam_role_policy_attachment" "cluster" {
@@ -43,6 +47,10 @@ resource "aws_eks_cluster" "this" {
     public_access_cidrs     = var.public_access_cidrs
   }
 
+    access_config {
+      authentication_mode = var.authentication_mode
+    }
+
   depends_on = [aws_iam_role_policy_attachment.cluster]
 }
 
@@ -58,6 +66,15 @@ resource "aws_iam_openid_connect_provider" "this" {
   client_id_list  = ["sts.amazonaws.com"]
   thumbprint_list = [data.tls_certificate.oidc[0].certificates[0].sha1_fingerprint]
 }
+
+resource "aws_eks_access_entry" "karpenter_node" {
+  count         = var.create_cluster && (var.authentication_mode == "API" || var.authentication_mode == "API_AND_CONFIG_MAP") ? 1 : 0
+  cluster_name  = var.cluster_name
+  principal_arn = "arn:aws:iam::${data.aws_caller_identity.current.account_id}:role/eks/KarpenterNodeRole-${var.cluster_name}"
+  type          = "EC2_LINUX"
+}
+
+data "aws_caller_identity" "current" {}
 
 data "aws_iam_openid_connect_provider" "this" {
   count = var.create_oidc_provider ? 0 : 1

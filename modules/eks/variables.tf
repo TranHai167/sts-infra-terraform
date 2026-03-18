@@ -62,3 +62,8 @@ variable "create_oidc_provider" {
   description = "Whether to create the IAM OIDC provider."
   default     = true
 }
+variable "authentication_mode" {
+  type        = string
+  description = "EKS authentication mode (API_AND_CONFIG_MAP, CONFIG_MAP, API)."
+  default     = "API_AND_CONFIG_MAP"
+}
