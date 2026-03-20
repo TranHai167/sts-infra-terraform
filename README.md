@@ -162,3 +162,34 @@ Ví dụ import role IRSA:
 ```powershell
 terragrunt --% import aws_iam_role.this["external_secrets"] arn:aws:iam::344414913751:role/external-secrets-role
 ```
+
+## Jenkins CI/CD
+
+Repo này có thể tách thành 2 Jenkins jobs riêng:
+
+- `terraform-plan`: dùng script path `Jenkinsfile.plan`
+- `terraform-apply`: dùng script path `Jenkinsfile.apply`
+
+### Job plan
+
+- checkout source
+- chạy `terraform fmt -check -recursive`
+- chạy `terragrunt init`, `validate`, `plan` theo thứ tự module
+- archive `tfplan.binary` và `tfplan.txt`
+
+### Job apply
+
+- checkout source
+- chạy lại `plan` để tránh apply plan cũ hoặc lệch commit
+- chờ approve thủ công trên Jenkins
+- chạy `terragrunt apply -auto-approve tfplan.binary`
+
+### Cấu hình Jenkins khuyến nghị
+
+- dùng Jenkins agent Linux có sẵn `terraform`, `terragrunt`, `aws`
+- cấu hình AWS credentials trong Jenkins, ví dụ `aws-jenkins-sts-uat`
+- đặt `Script Path` tương ứng cho từng job
+
+### Lưu ý provider AWS
+
+File `terragrunt/common.hcl` đã được chỉnh để chỉ dùng `AWS_PROFILE` khi biến môi trường này thực sự tồn tại. Trong Jenkins, bạn có thể cấp quyền bằng AWS credentials hoặc assume-role mà không cần profile local như máy developer.

@@ -11,8 +11,7 @@ generate "provider" {
   if_exists = "overwrite_terragrunt"
   contents  = <<EOF
 provider "aws" {
-  region  = "${local.env_config.region}"
-  profile = "sts-uat"
+  region = "${local.env_config.region}"
 
   default_tags {
     tags = ${jsonencode(local.common_tags)}

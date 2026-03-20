@@ -1,0 +1,91 @@
+pipeline {
+  agent any
+
+  options {
+    timestamps()
+    ansiColor('xterm')
+    disableConcurrentBuilds()
+    buildDiscarder(logRotator(numToKeepStr: '20'))
+  }
+
+  parameters {
+    choice(name: 'ENVIRONMENT', choices: ['uat'], description: 'Terragrunt environment')
+    choice(
+      name: 'TARGET_MODULE',
+      choices: ['all', 'vpc', 'eks', 'addons-iam', 'iam-irsa', 'karpenter-support', 'nodegroup'],
+      description: 'Terragrunt module to plan'
+    )
+    string(name: 'AWS_CREDENTIALS_ID', defaultValue: 'sts-AWS-account-credentials', description: 'Jenkins AWS credentials ID')
+  }
+
+  environment {
+    TF_INPUT = 'false'
+    TF_IN_AUTOMATION = 'true'
+    TERRAGRUNT_NON_INTERACTIVE = 'true'
+    TG_ENV_DIR = "${WORKSPACE}/terragrunt/envs/${params.ENVIRONMENT}"
+  }
+
+  stages {
+    stage('Checkout') {
+      steps {
+        checkout scm
+      }
+    }
+
+    stage('Tool Check') {
+      steps {
+        sh 'terraform version'
+        sh 'terragrunt --version'
+        sh 'aws --version'
+      }
+    }
+
+    stage('Format Check') {
+      steps {
+        sh 'terraform fmt -check -recursive'
+      }
+    }
+
+    stage('Plan') {
+      steps {
+        withCredentials([
+          [$class: 'AmazonWebServicesCredentialsBinding', credentialsId: params.AWS_CREDENTIALS_ID]
+        ]) {
+          script {
+            runTerragruntPlan(params.TARGET_MODULE, env.TG_ENV_DIR)
+          }
+        }
+      }
+    }
+  }
+
+  post {
+    always {
+      archiveArtifacts artifacts: 'terragrunt/envs/**/tfplan.binary, terragrunt/envs/**/tfplan.txt', allowEmptyArchive: true
+    }
+  }
+}
+
+def orderedModules() {
+  return ['vpc', 'eks', 'addons-iam', 'iam-irsa', 'karpenter-support', 'nodegroup']
+}
+
+def selectedModules(String target) {
+  if (target == 'all') {
+    return orderedModules()
+  }
+  return [target]
+}
+
+def runTerragruntPlan(String target, String envDir) {
+  for (module in selectedModules(target)) {
+    sh """
+      cd \"${envDir}/${module}\"
+      rm -f tfplan.binary tfplan.txt
+      terragrunt init -upgrade
+      terragrunt validate
+      terragrunt plan -out=tfplan.binary
+      terragrunt show -no-color tfplan.binary > tfplan.txt
+    """
+  }
+}
