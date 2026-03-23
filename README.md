@@ -193,3 +193,29 @@ Repo này có thể tách thành 2 Jenkins jobs riêng:
 ### Lưu ý provider AWS
 
 File `terragrunt/common.hcl` đã được chỉnh để chỉ dùng `AWS_PROFILE` khi biến môi trường này thực sự tồn tại. Trong Jenkins, bạn có thể cấp quyền bằng AWS credentials hoặc assume-role mà không cần profile local như máy developer.
+
+
+
+
+Bước 1 — vào thư mục kms:
+cd "c:\working space\gitops-argocd\sts-infra-terraform\terragrunt\envs\uat\kms"
+
+
+Bước 2 — Import KMS key:
+terragrunt import aws_kms_key.this c44a2a9b-97d5-485d-9811-a262e5359257
+
+
+Bước 3 — Import KMS alias:
+terragrunt import aws_kms_alias.this alias/alias/non-prod-sts-eks
+
+
+Bước 4 — Kiểm tra plan (quan trọng):
+terragrunt plan
+
+
+Xử lý kết quả plan:
+
+Plan báo gì	Hành động
+No changes	Hoàn tất, an toàn apply
+~ update in-place	Chỉnh lại inputs trong terragrunt.hcl cho khớp (description, rotation...)
+- destroy / + create	DỪNG — không apply, kiểm tra lại key policy hoặc alias_name
